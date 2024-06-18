@@ -29,9 +29,21 @@ class RegisterViewController: UIViewController {
         ///subviews
         view.addSubview(scrollView)
         scrollView.addSubview(imageView)
+        scrollView.addSubview(firstNameField)
+        scrollView.addSubview(lastNameField)
         scrollView.addSubview(emailField)
         scrollView.addSubview(passwordField)
         scrollView.addSubview(loginButton)
+        scrollView.addSubview(loginButton)
+        
+        imageView.isUserInteractionEnabled = true
+        scrollView.isUserInteractionEnabled = true
+        
+        
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapChangeProfilePic))
+        gesture.numberOfTapsRequired = 1
+        gesture.numberOfTouchesRequired = 1
+        imageView.addGestureRecognizer(gesture)
     }
     
     override func viewDidLayoutSubviews() {
@@ -44,8 +56,18 @@ class RegisterViewController: UIViewController {
                                  width: size,
                                  height: size)
         
-        emailField.frame = CGRect(x: 30,
+        firstNameField.frame = CGRect(x: 30,
                                   y: imageView.bottom+10,
+                                  width: scrollView.width-60,
+                                  height: 52)
+        
+        lastNameField.frame = CGRect(x: 30,
+                                  y: firstNameField.bottom+10,
+                                  width: scrollView.width-60,
+                                  height: 52)
+        
+        emailField.frame = CGRect(x: 30,
+                                  y: lastNameField.bottom+10,
                                   width: scrollView.width-60,
                                   height: 52)
         
@@ -69,8 +91,39 @@ class RegisterViewController: UIViewController {
     
     private let imageView: UIImageView = {
         let component = UIImageView()
-        component.image = UIImage(named: "logo-chat")
         component.contentMode = .scaleAspectFit
+        component.image = UIImage(systemName: "person")
+        component.tintColor = .gray
+        return component
+    }()
+    
+    private let firstNameField: UITextField = {
+        let component = UITextField()
+        component.autocapitalizationType = .none
+        component.autocorrectionType = .no
+        component.returnKeyType = .continue
+        component.layer.cornerRadius = 12
+        component.layer.borderWidth = 1
+        component.layer.borderColor = UIColor.lightGray.cgColor
+        component.placeholder = "Primeiro nome..."
+        component.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 0))
+        component.leftViewMode = .always
+        component.backgroundColor = .white
+        return component
+    }()
+    
+    private let lastNameField: UITextField = {
+        let component = UITextField()
+        component.autocapitalizationType = .none
+        component.autocorrectionType = .no
+        component.returnKeyType = .continue
+        component.layer.cornerRadius = 12
+        component.layer.borderWidth = 1
+        component.layer.borderColor = UIColor.lightGray.cgColor
+        component.placeholder = "Último nome..."
+        component.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 0))
+        component.leftViewMode = .always
+        component.backgroundColor = .white
         return component
     }()
     
@@ -82,7 +135,7 @@ class RegisterViewController: UIViewController {
         component.layer.cornerRadius = 12
         component.layer.borderWidth = 1
         component.layer.borderColor = UIColor.lightGray.cgColor
-        component.placeholder = "seu email..."
+        component.placeholder = "Seu email..."
         component.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 0))
         component.leftViewMode = .always
         component.backgroundColor = .white
@@ -97,7 +150,7 @@ class RegisterViewController: UIViewController {
         component.layer.cornerRadius = 12
         component.layer.borderWidth = 1
         component.layer.borderColor = UIColor.lightGray.cgColor
-        component.placeholder = "senha..."
+        component.placeholder = "Senha..."
         component.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 0))
         component.leftViewMode = .always
         component.backgroundColor = .white
@@ -107,8 +160,8 @@ class RegisterViewController: UIViewController {
     
     private let loginButton: UIButton = {
         let component = UIButton()
-        component.setTitle("Login", for: .normal)
-        component.backgroundColor = .link
+        component.setTitle("Cadastrar-se", for: .normal)
+        component.backgroundColor = .systemGreen
         component.setTitleColor(.white, for: .normal)
         component.layer.masksToBounds = true
         component.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
@@ -116,8 +169,26 @@ class RegisterViewController: UIViewController {
         return component
     }()
     
+    @objc func didTapChangeProfilePic() {
+        print("change pic")
+    }
+    
     @objc func loginButtonTapped() {
-        guard let email = emailField.text, let password = passwordField.text, !email.isEmpty, !password.isEmpty, password.count >= 6 else {
+        
+        emailField.resignFirstResponder()
+        passwordField.resignFirstResponder()
+        firstNameField.resignFirstResponder()
+        lastNameField.resignFirstResponder()
+        
+        guard let firstName = firstNameField.text,
+              let lastName = lastNameField.text,
+              let email = emailField.text,
+              let password = passwordField.text,
+              !firstName.isEmpty,
+              !lastName.isEmpty,
+              !email.isEmpty,
+              !password.isEmpty,
+              password.count >= 6 else {
             alertUserLoginError()
             return
         }
@@ -128,7 +199,7 @@ class RegisterViewController: UIViewController {
     
     func alertUserLoginError() {
         let alert = UIAlertController(title: "Ops",
-                                      message: "Coloque todas as informações corretas para fazer o log in",
+                                      message: "Coloque todas as informações corretas para fazer criar a sua conta",
                                       preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
         present(alert, animated: true)
