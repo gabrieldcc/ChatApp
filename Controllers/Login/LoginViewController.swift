@@ -224,7 +224,9 @@ extension LoginViewController: LoginButtonDelegate {
         FirebaseAuth.Auth.auth().signIn(with: credential) { [weak self] authResult, error in
             
             guard authResult != nil, error == nil else {
-                print("Facebook credential login failed, MFA may be needed")
+                if let error = error {
+                    print("Facebook credential login failed, MFA may be needed \(error)")
+                }
                 return
             }
             
