@@ -90,7 +90,7 @@ class RegisterViewController: UIViewController {
     private let imageView: UIImageView = {
         let component = UIImageView()
         component.contentMode = .scaleAspectFit
-        component.image = UIImage(systemName: "person")
+        component.image = UIImage(systemName: "person.circle")
         component.tintColor = .gray
         component.layer.masksToBounds = true
         component.layer.borderWidth = 2

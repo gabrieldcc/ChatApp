@@ -123,7 +123,7 @@ class LoginViewController: UIViewController {
         passwordField.resignFirstResponder()
         
         guard let email = emailField.text, let password = passwordField.text, !email.isEmpty, !password.isEmpty, password.count >= 6 else {
-            alertUserLoginError()
+           alertUserLoginErro2()
             return
         }
         
@@ -143,8 +143,8 @@ class LoginViewController: UIViewController {
         })
     }
     
-    func alertUserLoginError() {
-        let alert = UIAlertController(title: "Ops", 
+    func alertUserLoginErro2() {
+        let alert = UIAlertController(title: "Ops",
                                       message: "Coloque todas as informações corretas para fazer o log in",
                                       preferredStyle: .alert)
         
