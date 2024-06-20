@@ -110,6 +110,7 @@ class RegisterViewController: UIViewController {
         component.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 0))
         component.leftViewMode = .always
         component.backgroundColor = .white
+        component.text = "Gabriel"
         return component
     }()
     
@@ -125,6 +126,7 @@ class RegisterViewController: UIViewController {
         component.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 0))
         component.leftViewMode = .always
         component.backgroundColor = .white
+        component.text = "Catro"
         return component
     }()
     
@@ -140,6 +142,7 @@ class RegisterViewController: UIViewController {
         component.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 0))
         component.leftViewMode = .always
         component.backgroundColor = .white
+        component.text = "gabrieldcc@gmail.com"
         return component
     }()
     
@@ -156,6 +159,7 @@ class RegisterViewController: UIViewController {
         component.leftViewMode = .always
         component.backgroundColor = .white
         component.isSecureTextEntry = true
+        component.text = "Gabriel98$"
         return component
     }()
     
@@ -190,12 +194,22 @@ class RegisterViewController: UIViewController {
               !email.isEmpty,
               !password.isEmpty,
               password.count >= 6 else {
-            alertUserLoginError()
+            alertUserLoginError(message: "Coloque todas as informações corretas para fazer criar a sua conta")
             return
         }
         
         //Firebase Login
-        FirebaseAuth.Auth.auth().createUser(withEmail: email, 
+        
+        DatabaseManager.shared.userExists(with: email) { [weak self] exists in
+            guard !exists else {
+                self?.alertUserLoginError(message: "Parece que já existe um usuário com este e-mail")
+                return
+            }
+            
+            
+        }
+        
+        FirebaseAuth.Auth.auth().createUser(withEmail: email,
                                             password: password,
                                             completion: { [weak self] authResult, error  in
             
@@ -203,21 +217,28 @@ class RegisterViewController: UIViewController {
                 return
             }
             
-            guard let result = authResult, error == nil else {
+            guard authResult != nil, error == nil else {
                 print("Error creating user")
                 return
             }
             
-            let user = result.user
+            let user = ChatAppUser(firstName: firstName,
+                                   lastName: lastName,
+                                   emailAdress: email)
+            
+            DatabaseManager.shared.insertUser(with: user)
+            
             print("Created user: \(user)")
             strongSelf.navigationController?.dismiss(animated: true)
         })
         
     }
     
-    func alertUserLoginError() {
+    // "Coloque todas as informações corretas para fazer criar a sua conta"
+    
+    func alertUserLoginError(message: String) {
         let alert = UIAlertController(title: "Ops",
-                                      message: "Coloque todas as informações corretas para fazer criar a sua conta",
+                                      message: message,
                                       preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
         present(alert, animated: true)
