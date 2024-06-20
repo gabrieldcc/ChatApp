@@ -71,8 +71,6 @@ class LoginViewController: UIViewController {
         facebookLoginButton.frame.origin.y = loginButton.bottom+20
     }
     
-    private let loginButton = FBLoginButton()
-    
     private let scrollView: UIScrollView = {
         let component = UIScrollView()
         component.clipsToBounds = true
@@ -119,7 +117,13 @@ class LoginViewController: UIViewController {
        return component
     }()
     
-    private let facebookLoginButton: UIButton = {
+    private let facebookLoginButton: FBLoginButton =  {
+        let component = FBLoginButton()
+        component.permissions = ["email", "public_profile"]
+        return component
+    }()
+    
+    private let loginButton: UIButton = {
         let component = UIButton()
         component.setTitle("Login", for: .normal)
         component.backgroundColor = .link
@@ -200,5 +204,34 @@ extension LoginViewController: UITextFieldDelegate {
         }
         return true
     }
+}
+
+extension LoginViewController: LoginButtonDelegate {
     
+    func loginButtonDidLogOut(_ loginButton: FBSDKLoginKit.FBLoginButton) {
+        //no operation
+    }
+    
+    func loginButton(_ loginButton: FBSDKLoginKit.FBLoginButton, didCompleteWith result: FBSDKLoginKit.LoginManagerLoginResult?, error: Error?) {
+        
+        guard let token = result?.token?.tokenString else {
+            print("User failed to log in with facebook")
+            return
+        }
+        
+        let credential = FacebookAuthProvider.credential(withAccessToken: token)
+        
+        FirebaseAuth.Auth.auth().signIn(with: credential) { [weak self] authResult, error in
+            
+            guard authResult != nil, error == nil else {
+                print("Facebook credential login failed, MFA may be needed")
+                return
+            }
+            
+            print("Successfully logged user in")
+            self?.navigationController?.dismiss(animated: true)
+        }
+    }
+    
+        
 }
