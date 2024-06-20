@@ -6,15 +6,16 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Log in"
+        title = "Login"
         view.backgroundColor = .white
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Register",
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Cadastrar",
                                                             style: .done,
                                                             target: self,
                                                             action: #selector(didTapRegister))
@@ -127,13 +128,26 @@ class LoginViewController: UIViewController {
         }
         
         //Firebase Login
-        
+        FirebaseAuth.Auth.auth().signIn(withEmail: email,
+                                        password: password,
+                                        completion: { authResult, error in
+                
+            guard let result = authResult, error == nil else {
+                print("Failed to login user with email: \(email)")
+                return
+            }
+            
+            let user = result.user
+            print("Logged in user: \(user)")
+                                            
+        })
     }
     
     func alertUserLoginError() {
         let alert = UIAlertController(title: "Ops", 
                                       message: "Coloque todas as informações corretas para fazer o log in",
                                       preferredStyle: .alert)
+        
         alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
         present(alert, animated: true)
         
@@ -164,10 +178,8 @@ extension LoginViewController: UITextFieldDelegate {
         if textField == emailField {
             passwordField.becomeFirstResponder()
         } else if textField == passwordField {
-            
             loginButtonTapped()
         }
-        
         return true
     }
     

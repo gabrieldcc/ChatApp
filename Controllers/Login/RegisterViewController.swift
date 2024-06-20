@@ -6,21 +6,17 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class RegisterViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Log in"
+        title = "Login"
         view.backgroundColor = .white
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Register",
-                                                            style: .done,
-                                                            target: self,
-                                                            action: #selector(didTapRegister))
-        
-        loginButton.addTarget(self,
-                              action: #selector(loginButtonTapped),
+        registerButton.addTarget(self,
+                              action: #selector(registerButtonTapped),
                               for: .touchUpInside)
         
         emailField.delegate = self
@@ -33,8 +29,8 @@ class RegisterViewController: UIViewController {
         scrollView.addSubview(lastNameField)
         scrollView.addSubview(emailField)
         scrollView.addSubview(passwordField)
-        scrollView.addSubview(loginButton)
-        scrollView.addSubview(loginButton)
+        scrollView.addSubview(registerButton)
+        scrollView.addSubview(registerButton)
         
         imageView.isUserInteractionEnabled = true
         scrollView.isUserInteractionEnabled = true
@@ -56,6 +52,8 @@ class RegisterViewController: UIViewController {
                                  width: size,
                                  height: size)
         
+        imageView.layer.cornerRadius = imageView.width/2.0
+        
         firstNameField.frame = CGRect(x: 30,
                                   y: imageView.bottom+10,
                                   width: scrollView.width-60,
@@ -76,7 +74,7 @@ class RegisterViewController: UIViewController {
                                      width: scrollView.width-60,
                                      height: 52)
         
-        loginButton.frame = CGRect(x: 30,
+        registerButton.frame = CGRect(x: 30,
                                    y: passwordField.bottom+10,
                                    width: scrollView.width-60,
                                    height: 52)
@@ -94,6 +92,9 @@ class RegisterViewController: UIViewController {
         component.contentMode = .scaleAspectFit
         component.image = UIImage(systemName: "person")
         component.tintColor = .gray
+        component.layer.masksToBounds = true
+        component.layer.borderWidth = 2
+        component.layer.borderColor = UIColor.lightGray.cgColor
         return component
     }()
     
@@ -158,7 +159,7 @@ class RegisterViewController: UIViewController {
         return component
     }()
     
-    private let loginButton: UIButton = {
+    private let registerButton: UIButton = {
         let component = UIButton()
         component.setTitle("Cadastrar-se", for: .normal)
         component.backgroundColor = .systemGreen
@@ -173,7 +174,7 @@ class RegisterViewController: UIViewController {
         presentPhotoActionSheet()
     }
     
-    @objc func loginButtonTapped() {
+    @objc func registerButtonTapped() {
         
         emailField.resignFirstResponder()
         passwordField.resignFirstResponder()
@@ -194,6 +195,19 @@ class RegisterViewController: UIViewController {
         }
         
         //Firebase Login
+        FirebaseAuth.Auth.auth().createUser(withEmail: email, 
+                                            password: password,
+                                            completion: { authResult, error  in
+            
+            guard let result = authResult, error == nil else {
+                print("Error creating user")
+                return
+            }
+            
+            let user = result.user
+            print("Created user: \(user)")
+                                            
+        })
         
     }
     
@@ -232,7 +246,7 @@ extension RegisterViewController: UITextFieldDelegate {
             passwordField.becomeFirstResponder()
         } else if textField == passwordField {
             
-            loginButtonTapped()
+            registerButtonTapped()
         }
         
         return true
@@ -240,22 +254,55 @@ extension RegisterViewController: UITextFieldDelegate {
     
 }
 
-extension RegisterViewController: UIImagePickerControllerDelegate {
+extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     func presentPhotoActionSheet() {
-        let actionSheet = UIAlertController(title: "Foto de Perfil", message: "Como você quer selecionar uma foto de perfil?", preferredStyle: .actionSheet)
-        actionSheet.addAction(UIAlertAction(title: "Cancelar", style: .cancel, handler: nil))
-        actionSheet.addAction(UIAlertAction(title: "Tirar foto", style: .default, handler: nil))
-        actionSheet.addAction(UIAlertAction(title: "Escolher uma foto", style: .default, handler: nil))
+        let actionSheet = UIAlertController(title: "Foto de Perfil", 
+                                            message: "Como você quer selecionar uma foto de perfil?",
+                                            preferredStyle: .actionSheet)
+        
+        actionSheet.addAction(UIAlertAction(title: "Cancelar", 
+                                            style: .cancel,
+                                            handler: nil))
+        
+        actionSheet.addAction(UIAlertAction(title: "Tirar foto",
+                                            style: .default,
+                                            handler: { [weak self] _ in self?.presentCamera() }) )
+        
+        actionSheet.addAction(UIAlertAction(title: "Escolher uma foto", 
+                                            style: .default,
+                                            handler:  { [weak self] _ in self?.presentPhotoPicker() }) )
         present(actionSheet, animated: true)
     }
     
+    func presentCamera() {
+        let vc = UIImagePickerController()
+        vc.sourceType = .camera
+        vc.delegate = self
+        vc.allowsEditing = true
+        present(vc, animated: true)
+    }
+    
+    func presentPhotoPicker() {
+        let vc = UIImagePickerController()
+        vc.sourceType = .photoLibrary
+        vc.delegate = self
+        vc.allowsEditing = true
+        present(vc, animated: true)
+    }
+    
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        
+        picker.dismiss(animated: true)
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true)
         
+        guard let selectedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage else {
+            return
+        }
+       
+        self.imageView.image = selectedImage
     }
 }
 
