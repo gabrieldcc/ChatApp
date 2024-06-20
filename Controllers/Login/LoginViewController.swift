@@ -48,17 +48,17 @@ class LoginViewController: UIViewController {
         emailField.frame = CGRect(x: 30,
                                   y: imageView.bottom+10,
                                   width: scrollView.width-60,
-                                 height: 52)
+                                  height: 52)
         
         passwordField.frame = CGRect(x: 30,
-                                  y: emailField.bottom+10,
-                                  width: scrollView.width-60,
-                                 height: 52)
+                                     y: emailField.bottom+10,
+                                     width: scrollView.width-60,
+                                     height: 52)
         
         loginButton.frame = CGRect(x: 30,
-                                  y: passwordField.bottom+10,
-                                  width: scrollView.width-60,
-                                 height: 52)
+                                   y: passwordField.bottom+10,
+                                   width: scrollView.width-60,
+                                   height: 52)
     }
     
     
@@ -72,6 +72,8 @@ class LoginViewController: UIViewController {
         let component = UIImageView()
         component.image = UIImage(named: "logo-chat")
         component.contentMode = .scaleAspectFit
+        component.layer.cornerRadius = 12
+        component.clipsToBounds = true
        return component
     }()
     
@@ -83,7 +85,7 @@ class LoginViewController: UIViewController {
         component.layer.cornerRadius = 12
         component.layer.borderWidth = 1
         component.layer.borderColor = UIColor.lightGray.cgColor
-        component.placeholder = "seu email..."
+        component.placeholder = "Seu email..."
         component.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 0))
         component.leftViewMode = .always
         component.backgroundColor = .white
@@ -98,7 +100,7 @@ class LoginViewController: UIViewController {
         component.layer.cornerRadius = 12
         component.layer.borderWidth = 1
         component.layer.borderColor = UIColor.lightGray.cgColor
-        component.placeholder = "senha..."
+        component.placeholder = "Senha..."
         component.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 6, height: 0))
         component.leftViewMode = .always
         component.backgroundColor = .white
@@ -130,7 +132,11 @@ class LoginViewController: UIViewController {
         //Firebase Login
         FirebaseAuth.Auth.auth().signIn(withEmail: email,
                                         password: password,
-                                        completion: { authResult, error in
+                                        completion: { [weak self] authResult, error in
+            
+            guard let strongSelf = self else {
+                return
+            }
                 
             guard let result = authResult, error == nil else {
                 print("Failed to login user with email: \(email)")
@@ -139,6 +145,7 @@ class LoginViewController: UIViewController {
             
             let user = result.user
             print("Logged in user: \(user)")
+            strongSelf.navigationController?.dismiss(animated: true)
                                             
         })
     }
