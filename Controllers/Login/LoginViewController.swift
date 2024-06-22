@@ -35,6 +35,8 @@ class LoginViewController: UIViewController {
         scrollView.addSubview(passwordField)
         scrollView.addSubview(loginButton)
         scrollView.addSubview(facebookLoginButton)
+        
+        facebookLoginButton.delegate = self
     }
     
     override func viewDidLayoutSubviews() {
@@ -209,7 +211,7 @@ extension LoginViewController: UITextFieldDelegate {
 extension LoginViewController: LoginButtonDelegate {
     
     func loginButtonDidLogOut(_ loginButton: FBSDKLoginKit.FBLoginButton) {
-        //no operation
+        
     }
     
     func loginButton(_ loginButton: FBSDKLoginKit.FBLoginButton, didCompleteWith result: FBSDKLoginKit.LoginManagerLoginResult?, error: Error?) {
@@ -219,21 +221,35 @@ extension LoginViewController: LoginButtonDelegate {
             return
         }
         
-        let credential = FacebookAuthProvider.credential(withAccessToken: token)
+        let facebookRequest = FBSDKLoginKit.GraphRequest(graphPath: "me",
+                                                         parameters: ["fields": "email, name"],
+                                                         tokenString: token,
+                                                         version: nil,
+                                                         httpMethod: .get)
         
-        FirebaseAuth.Auth.auth().signIn(with: credential) { [weak self] authResult, error in
-            
-            guard authResult != nil, error == nil else {
-                if let error = error {
-                    print("Facebook credential login failed, MFA may be needed \(error)")
-                }
+        facebookRequest.start { connection, result, error in
+            guard let result = result as? [String: Any], error == nil else {
+                print("Failed to make facebook graph request")
                 return
             }
+            print("\(result)")
             
-            print("Successfully logged user in")
-            self?.navigationController?.dismiss(animated: true)
+            
+            let credential = FacebookAuthProvider.credential(withAccessToken: token)
+            
+            FirebaseAuth.Auth.auth().signIn(with: credential) { [weak self] authResult, error in
+                
+                guard authResult != nil, error == nil else {
+                    if let error = error {
+                        print("Facebook credential login failed, MFA may be needed \(error)")
+                    }
+                    return
+                }
+                
+                print("Successfully logged user in")
+                self?.navigationController?.dismiss(animated: true)
+            }
         }
     }
-    
         
 }
