@@ -20,7 +20,7 @@ class LoginViewController: UIViewController {
         loginObserver = NotificationCenter.default.addObserver(forName: .didLogInNotification,
                                                                object: nil,
                                                                queue: .main) { [weak self] _ in
-    
+            self?.navigationController?.dismiss(animated: true)
         }
         
         GIDSignIn.sharedInstance.signIn(withPresenting: self)
@@ -101,7 +101,7 @@ class LoginViewController: UIViewController {
                                    height: 52)
         
         googleLoginButton.center = scrollView.center
-        googleLoginButton.frame.origin.y = loginButton.bottom+20
+        googleLoginButton.frame.origin.y = facebookLoginButton.bottom+20
         
         
     }
