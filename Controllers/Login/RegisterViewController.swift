@@ -218,7 +218,7 @@ class RegisterViewController: UIViewController {
             }
             
             guard authResult != nil, error == nil else {
-                print("Error creating user")
+                print("Error creating user: \(String(describing: error))")
                 return
             }
             
