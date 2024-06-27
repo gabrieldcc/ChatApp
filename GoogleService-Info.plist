@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>287035553376-v01g8rh4vun4u3u8r4em63e8obft5k7f.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.287035553376-v01g8rh4vun4u3u8r4em63e8obft5k7f</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCsP55bfVAhwEzJ7pLwDWGrQw7ps-JX9qg</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,16 +19,18 @@
 	<key>STORAGE_BUCKET</key>
 	<string>chata-95364.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:287035553376:ios:94ad0687c65965ccf7f505</string>
+	<key>DATABASE_URL</key>
+	<string>https://chata-95364-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>
