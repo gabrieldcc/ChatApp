@@ -22,9 +22,7 @@ class LoginViewController: UIViewController {
                                                                queue: .main) { [weak self] _ in
             self?.navigationController?.dismiss(animated: true)
         }
-        
-        GIDSignIn.sharedInstance.signIn(withPresenting: self)
-        
+                
         title = "Login"
         view.backgroundColor = .white
         
@@ -357,6 +355,9 @@ extension LoginViewController {
             print("Login Google Success: \(signInResult)")
           // If sign in succeeded, display the app's main content View.
         }
+                
     }
+    
+    
     
 }
