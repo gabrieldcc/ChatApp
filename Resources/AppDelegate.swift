@@ -28,14 +28,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let config = GIDConfiguration(clientID: clientID)
         
         GIDSignIn.sharedInstance.configuration = config
-//
-//        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
-//            if error != nil || user == nil {
-//                // Show the app's signed-out state.
-//            } else {
-//                // Show the app's signed-in state.
-//            }
-//        }
+
+        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+            if error != nil || user == nil {
+                // Show the app's signed-out state.
+                print("User is not Logged In")
+            } else {
+                // Show the app's signed-in state.
+                print("User is Logged In, should send to Conversations")
+
+            }
+        }
         
         return true
     }
