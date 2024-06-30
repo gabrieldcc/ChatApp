@@ -21,6 +21,7 @@ class NewConversationViewController: UIViewController {
         view.backgroundColor = .white
         navigationController?.navigationBar.topItem?.titleView = searchBar
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Cancelar", style: .done, target: self, action: #selector(dismissSelf))
+        searchBar.becomeFirstResponder()
     }
     
     @objc func dismissSelf() {

@@ -23,7 +23,7 @@ class LoginViewController: UIViewController {
                                                                queue: .main) { [weak self] _ in
             self?.navigationController?.dismiss(animated: true)
         }
-                
+        
         title = "Login"
         view.backgroundColor = .white
         
@@ -37,8 +37,8 @@ class LoginViewController: UIViewController {
                               for: .touchUpInside)
         
         googleLoginButton.addTarget(self,
-                              action: #selector(googleSigin),
-                              for: .touchUpInside)
+                                    action: #selector(googleSigin),
+                                    for: .touchUpInside)
         
         emailField.delegate = self
         passwordField.delegate = self
@@ -87,17 +87,17 @@ class LoginViewController: UIViewController {
                                    height: 52)
         
         facebookLoginButton.frame = CGRect(x: 30,
-                                   y: loginButton.bottom+10,
-                                   width: scrollView.width-60,
-                                   height: 52)
+                                           y: loginButton.bottom+10,
+                                           width: scrollView.width-60,
+                                           height: 52)
         
         facebookLoginButton.center = scrollView.center
         facebookLoginButton.frame.origin.y = loginButton.bottom+20
         
         googleLoginButton.frame = CGRect(x: 30,
-                                   y: facebookLoginButton.bottom+10,
-                                   width: scrollView.width-60,
-                                   height: 52)
+                                         y: facebookLoginButton.bottom+10,
+                                         width: scrollView.width-60,
+                                         height: 52)
         
         googleLoginButton.center = scrollView.center
         googleLoginButton.frame.origin.y = facebookLoginButton.bottom+20
@@ -119,7 +119,7 @@ class LoginViewController: UIViewController {
         component.contentMode = .scaleAspectFit
         component.layer.cornerRadius = 12
         component.clipsToBounds = true
-       return component
+        return component
     }()
     
     private let emailField: UITextField = {
@@ -135,7 +135,7 @@ class LoginViewController: UIViewController {
         component.leftViewMode = .always
         component.backgroundColor = .white
         component.tintColor = .black
-       return component
+        return component
     }()
     
     private let passwordField: UITextField = {
@@ -152,7 +152,7 @@ class LoginViewController: UIViewController {
         component.backgroundColor = .white
         component.isSecureTextEntry = true
         component.tintColor = .black
-       return component
+        return component
     }()
     
     private let facebookLoginButton: FBLoginButton =  {
@@ -178,7 +178,7 @@ class LoginViewController: UIViewController {
         component.layer.masksToBounds = true
         component.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
         component.layer.cornerRadius = 12
-       return component
+        return component
     }()
     
     @objc func loginButtonTapped() {
@@ -187,7 +187,7 @@ class LoginViewController: UIViewController {
         passwordField.resignFirstResponder()
         
         guard let email = emailField.text, let password = passwordField.text, !email.isEmpty, !password.isEmpty, password.count >= 6 else {
-           alertUserLoginErro2()
+            alertUserLoginErro2()
             return
         }
         
@@ -204,9 +204,9 @@ class LoginViewController: UIViewController {
             
             DispatchQueue.main.async {
                 self?.spinner.dismiss()
-
-            }
                 
+            }
+            
             guard let result = authResult, error == nil else {
                 print("Failed to login user with email: \(email)")
                 return
@@ -215,7 +215,7 @@ class LoginViewController: UIViewController {
             let user = result.user
             print("Logged in user: \(user)")
             strongSelf.navigationController?.dismiss(animated: true)
-                                            
+            
         })
     }
     
@@ -235,17 +235,17 @@ class LoginViewController: UIViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
     
-
+    
     /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+     // Get the new view controller using segue.destination.
+     // Pass the selected object to the new view controller.
+     }
+     */
+    
 }
 
 extension LoginViewController: UITextFieldDelegate {
@@ -276,7 +276,7 @@ extension LoginViewController: LoginButtonDelegate {
         }
         
         let facebookRequest = FBSDKLoginKit.GraphRequest(graphPath: "me",
-                                                         parameters: ["fields": "email, name"],
+                                                         parameters: ["fields": "email, first_name, last_name, picture.type(large)"],
                                                          tokenString: token,
                                                          version: nil,
                                                          httpMethod: .get)
@@ -288,23 +288,49 @@ extension LoginViewController: LoginButtonDelegate {
             }
             print("\(result)")
             
-            guard let userName = result["name"] as? String,
+            guard let firstName = result["first_name"] as? String,
+                  let lastName = result["last_name"] as? String,
+                  let picture = result["picture"] as? [String : Any],
+                  let data = picture["data"] as? [String: Any],
+                  let pictureUrl = data["url"] as? String,
                   let email = result["email"] as? String else {
-                      print("Failed to get email and name from facebook result")
-                      return
-                  }
-            let nameComponents = userName.components(separatedBy: " ")
-            guard nameComponents.count == 2 else {
+                print("Failed to get email and name from facebook result")
                 return
             }
-            
-            let firstName = nameComponents[0]
-            let lastName = nameComponents[1]
-            
+
             DatabaseManager.shared.userExists(with: email) { exists in
                 if !exists {
-                    let user = ChatAppUser(firstName: firstName, lastName: lastName, emailAdress: email)
-                    DatabaseManager.shared.insertUser(with: user)
+                    let chatUser = ChatAppUser(firstName: firstName, lastName: lastName, emailAdress: email)
+                    DatabaseManager.shared.insertUser(with: chatUser, completion: { success in
+                        if success {
+                            //upload image
+                            guard let url = URL(string: pictureUrl) else {
+                                return
+                            }
+                            
+                            print("Download data from Facebook image")
+                            
+                            URLSession.shared.dataTask(with: url, completionHandler: { data, _, _ in
+                                guard let data = data else {
+                                    print("Failed to get data from Facebook")
+                                    return
+                                }
+                                
+                                print("Got data from Facebook image")
+                                
+                                let fileName = chatUser.profilePictureFileName
+                                StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName) { result in
+                                    switch result {
+                                    case .success(let downloadUrl):
+                                        UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
+                                        print(downloadUrl)
+                                    case .failure(let error):
+                                        print("Storage manager error: \(error)")
+                                    }
+                                }
+                            }).resume()
+                        }
+                    })
                 }
             }
             
@@ -324,7 +350,7 @@ extension LoginViewController: LoginButtonDelegate {
             }
         }
     }
-        
+    
 }
 
 //MARK: - Google Sigin
@@ -338,7 +364,8 @@ extension LoginViewController {
                   let email = signInResult?.user.profile?.email,
                   let firstName =  signInResult?.user.profile?.givenName,
                   let lastName = signInResult?.user.profile?.familyName,
-                  let user = signInResult?.user
+                  let user = signInResult?.user,
+                  let userProfile = signInResult?.user.profile
             else { return }
             
             print("Did Sigin with Google: \(user)")
@@ -346,8 +373,31 @@ extension LoginViewController {
             DatabaseManager.shared.userExists(with: email) { exists in
                 if !exists {
                     //insert to database
-                    let user = ChatAppUser(firstName: firstName, lastName: lastName, emailAdress: email)
-                    DatabaseManager.shared.insertUser(with: user)
+                    let chatUser = ChatAppUser(firstName: firstName, lastName: lastName, emailAdress: email)
+                    DatabaseManager.shared.insertUser(with: chatUser, completion: { success in
+                        if success {
+                            //upload image
+                            guard let url = userProfile.imageURL(withDimension: 200) else {
+                                return
+                            }
+                            URLSession.shared.dataTask(with: url, completionHandler: { data, _, _ in
+                                
+                                guard let data = data else {
+                                    return
+                                }
+                                let fileName = chatUser.profilePictureFileName
+                                StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName, completion: { result in
+                                    switch result {
+                                    case .success(let downloadUrl):
+                                        UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
+                                        print(downloadUrl)
+                                    case .failure(let error):
+                                        print("Storage manager error: \(error)")
+                                    }
+                                })
+                            }).resume()
+                        }
+                    })
                 }
             }
             
@@ -363,9 +413,9 @@ extension LoginViewController {
             }
             
             print("Login Google Success: \(signInResult)")
-          // If sign in succeeded, display the app's main content View.
+            // If sign in succeeded, display the app's main content View.
         }
-                
+        
     }
     
     
