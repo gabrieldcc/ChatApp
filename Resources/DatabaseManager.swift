@@ -13,6 +13,13 @@ final class DatabaseManager {
     static let shared = DatabaseManager()
     
     private let database = Database.database().reference()
+    
+    static func safeEmail(emailAdress: String) -> String {
+        let safeEmail = emailAdress
+            .replacingOccurrences(of: ".", with: "-")
+            .replacingOccurrences(of: "@", with: "-")
+        return safeEmail
+    }
    
 }
 
