@@ -54,6 +54,15 @@ class NewConversationViewController: UIViewController {
         searchBar.becomeFirstResponder()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        tableView.frame = view.bounds
+        noResultsLabel.frame = CGRect(x: view.width/4,
+                                      y: (view.height-200)/2,
+                                      width: view.width/2,
+                                      height: 200)
+    }
+    
     @objc func dismissSelf() {
         dismiss(animated: true)
     }
@@ -66,6 +75,8 @@ extension NewConversationViewController: UISearchBarDelegate {
         guard let text = searchBar.text, !text.replacingOccurrences(of: " ", with: "").isEmpty else {
             return
         }
+        
+        searchBar.resignFirstResponder()
         
         results.removeAll()
         spinner.show(in: view)
