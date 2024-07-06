@@ -16,6 +16,33 @@ struct Message: MessageType {
     var kind: MessageKind
 }
 
+extension MessageKind {
+    var messageKindString: String {
+        switch self {
+        case .text(_):
+            return "text"
+        case .attributedText(_):
+            return "attributedText"
+        case .photo(_):
+            return "photo"
+        case .video(_):
+            return "video"
+        case .location(_):
+            return "location"
+        case .emoji(_):
+            return "emoji"
+        case .audio(_):
+            return "audio"
+        case .contact(_):
+            return "contact"
+        case .linkPreview(_):
+            return "linkPreview"
+        case .custom(_):
+            return "custom"
+        }
+    }
+}
+
 struct Sender: SenderType {
     var photo: String
     var senderId: String
@@ -99,7 +126,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
                 if success {
                     print("message sent")
                 } else {
-                    print("faile to sent")
+                    print("failed to sent")
                 }
             })
         } else {
@@ -110,13 +137,15 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
     private func createMessageId() -> String? {
         //date, otherUserEmail, senderEmail, randomInt
         
-        guard let currentUserEmail = UserDefaults.standard.value(forKey: "email") else {
+        guard let currentUserEmail = UserDefaults.standard.value(forKey: "email") as? String else {
             return nil
         }
         
+        let safeCurrentEmail = DatabaseManager.safeEmail(emailAdress: currentUserEmail)
+        
         let dateString = Self.dateFormatter.string(from: Date())
         
-        let newIdentifier = "\(otherUserEmail)_\(currentUserEmail)_\(currentUserEmail)"
+        let newIdentifier = "\(otherUserEmail)_\(safeCurrentEmail)_\(dateString)"
         
         print("create message id: \(newIdentifier)")
         
