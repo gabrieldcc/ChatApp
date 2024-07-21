@@ -8,6 +8,7 @@
 import UIKit
 import FirebaseAuth
 import JGProgressHUD
+import SwiftUI
 
 struct Conversation {
     let id: String
